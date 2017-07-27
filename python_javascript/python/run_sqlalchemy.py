@@ -12,11 +12,16 @@ nobel_winners = [
     'nationality': 'Swiss',
     'sex': 'male',
     'year': 1921},
-    {'category': 'Physics2',
-     'name': 'Albert Einstein2',
-     'nationality': 'Swiss2',
+    {'category': 'Physics',
+     'name': 'Paul Dirac',
+     'nationality': 'America',
      'sex': 'male',
-     'year': 1922},
+     'year': 1933},
+    {'category': 'Chemistry',
+     'name': 'Marie Curie',
+     'nationality': 'America',
+     'sex': 'male',
+     'year': 1911},
                  ]
 
 class Winner(Base):
@@ -54,3 +59,34 @@ print(session.query(Winner).count())
 
 result = session.query(Winner).filter_by(nationality='Swiss')
 print(list(result))
+
+
+result = session.query(Winner).filter(Winner.category == 'Physics',
+                                      Winner.nationality != 'Swiss')
+print(list(result))
+result = session.query(Winner).get(3)
+print(result)
+
+res = session.query(Winner).order_by('year')
+print(res)
+
+def inst_to_dict(inst, delete_id=True):
+    dat = {}
+    for column in inst.__table__.columns:
+        dat[column.name] = getattr(inst, column.name)
+    if delete_id:
+        dat.pop('id')
+    return dat
+
+winner_rows = session.query(Winner)
+nobel_winners = [inst_to_dict(w) for w in winner_rows]
+print(nobel_winners)
+
+marie = session.query(Winner).get(3)
+marie.nationality = 'French'
+print(session.dirty)
+print(session.commit())
+
+print(session.query(Winner).filter_by(name='Albert Einstein').delete())
+print(list(session.query(Winner)))
+
